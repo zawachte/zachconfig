@@ -1,0 +1,46 @@
+#cloud-config
+# Add groups to the system
+# The following example adds the ubuntu group with members 'root' and 'sys'
+# and the empty group cloud-users.
+#groups:
+#  - ubuntu: [root,sys]
+#  - cloud-users
+
+# Add users to the system. Users are added after groups are added.
+# Note: Most of these configuration options will not be honored if the user
+#       already exists. Following options are the exceptions and they are
+#       applicable on already-existing users:
+#       - 'plain_text_passwd', 'hashed_passwd', 'lock_passwd', 'sudo',
+#         'ssh_authorized_keys', 'ssh_redirect_user'.
+users:
+  - default
+  - name: zach
+    gecos: ZacharyWachtel
+    sudo:  ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ''
+apt:
+  sources:
+    docker.list:
+      source: deb [arch=amd64] https://download.docker.com/linux/ubuntu $RELEASE stable
+      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+
+packages:
+  - make
+  - curl
+  - wget
+  - jq
+  - ca-certificates
+  - zsh
+  - gcc
+
+runcmd:
+  - sleep 30
+  - curl -L -o go1.17.3.linux-arm64.tar.gz https://go.dev/dl/go1.17.3.linux-arm64.tar.gz
+  - tar -C /usr/local -xzf go1.17.3.linux-arm64.tar.gz
+  - export PATH=$PATH:/usr/local/go/bin
+  - curl -fsSL https://get.docker.com -o get-docker.sh
+  - sh get-docker.sh
+  - echo "export PATH=$PATH:/usr/local/go/bin" >> /home/zach/.profile
+  - usermod -aG docker zach
+ # - zsh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
